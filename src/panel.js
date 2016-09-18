@@ -47,6 +47,19 @@ function akPanel () {
       scope.setActive = function (active) {
         scope.active = active;
       };
+
+      var onResize = function() {
+        // TODO replace jQuery offset here
+        scope.position = $(element).offset().top;
+      };
+      onResize();
+
+      // bind resize event
+      angular.element(window).on('resize', onResize);
+      scope.$on('$destroy',function(){
+        angular.element(window).unbind('resize', onResize);
+      });
+
     }
   };
 }

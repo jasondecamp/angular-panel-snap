@@ -208,12 +208,12 @@ function panelGroupController ($scope, $element, $attrs, $window, $timeout, $doc
     }
   }
 
-  function scrollFn(e) {
-    var threshold = 50;
+  function scrollFn() {
+    if (!ctrl.enabled) scrollStop();
     $timeout.cancel(scrollTimeout);
     scrollTimeout = $timeout(function () {
-      scrollStop(e);
-    }, threshold);
+      scrollStop();
+    }, 50);
   }
 
   function resize() {
@@ -231,8 +231,7 @@ function panelGroupController ($scope, $element, $attrs, $window, $timeout, $doc
     }, threshold);
   }
 
-  function scrollStop(e) {
-    e.stopPropagation();
+  function scrollStop() {
 
     // if (ctrl.isMouseDown) {
     //  return;
@@ -245,14 +244,11 @@ function panelGroupController ($scope, $element, $attrs, $window, $timeout, $doc
     var target;
     var offset = ctrl.snapContainer.scrollTop();
 
-    if (!ctrl.enabled) {
-      // still want to activate the correct panel even if snapping is disabled
-      target = Math.max(0, Math.min(Math.round(offset / ctrl.scrollInterval), ctrl.panels.length - 1));
-      if (target !== ctrl.currentPanel) {
-        activatePanel(target);
-      }
-      return;
-    }
+
+    // still want to activate the correct panel even if snapping is disabled
+    angular.forEach(ctrl.panels, function(panel,i) { if(panel.position < offset + ctrl.scrollInterval/2) target = i; });
+    if (target !== ctrl.currentPanel) $scope.$apply(activatePanel(target));
+    if (!ctrl.enabled) return true;
 
     var scrollDifference = offset - ctrl.scrollOffset;
     var maxOffset = ctrl.container[0].scrollHeight - ctrl.scrollInterval;
